@@ -4,8 +4,6 @@
 
 [Abrir la aplicación web](https://jggallardo.github.io/nido-finanzas/) · [Repositorio](https://github.com/JGGallardo/nido-finanzas) · [Publicaciones y controles](https://github.com/JGGallardo/nido-finanzas/actions)
 
-[Abrir la aplicación web](https://jggallardo.github.io/nido-finanzas/) · [Repositorio](https://github.com/JGGallardo/nido-finanzas) · [Publicaciones y controles](https://github.com/JGGallardo/nido-finanzas/actions)
-
 ## Estado de esta primera entrega
 
 MVP local funcional con datos de demostración. Proyectos Android, iOS, web, Windows, macOS y Linux generados. La versión web es la plataforma compilada y verificada en esta etapa; las plataformas nativas requieren sus toolchains y pruebas en dispositivos antes de distribuir.
