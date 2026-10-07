@@ -2,6 +2,10 @@
 
 **Más calma. Más futuro.** Aplicación multiplataforma para organizar las finanzas del hogar, construida con Flutter y arquitectura local-first.
 
+[Abrir la aplicación web](https://jggallardo.github.io/nido-finanzas/) · [Repositorio](https://github.com/JGGallardo/nido-finanzas) · [Publicaciones y controles](https://github.com/JGGallardo/nido-finanzas/actions)
+
+[Abrir la aplicación web](https://jggallardo.github.io/nido-finanzas/) · [Repositorio](https://github.com/JGGallardo/nido-finanzas) · [Publicaciones y controles](https://github.com/JGGallardo/nido-finanzas/actions)
+
 ## Estado de esta primera entrega
 
 MVP local funcional con datos de demostración. Proyectos Android, iOS, web, Windows, macOS y Linux generados. La versión web es la plataforma compilada y verificada en esta etapa; las plataformas nativas requieren sus toolchains y pruebas en dispositivos antes de distribuir.
@@ -97,7 +101,7 @@ Abrir `http://127.0.0.1:8080/nido-finanzas/`. El server de preview solo escucha 
 
 El workflow `.github/workflows/pages.yml` verifica formato, análisis, tests, build y backend antes de publicar. Los pull requests solo verifican. Cada actualización de `main` y las ejecuciones manuales despliegan la versión web en el entorno `github-pages`.
 
-En el repositorio nuevo, abrir **Settings → Pages → Source → GitHub Actions**. Confirmar la primera ejecución exitosa en **Actions**. El repositorio y la publicación remota se habilitan únicamente después de la autorización requerida por el entorno. No confundir una URL prevista con un sitio ya publicado.
+Repositorio: [JGGallardo/nido-finanzas](https://github.com/JGGallardo/nido-finanzas). GitHub Pages está configurado con **Source → GitHub Actions**. El estado de cada publicación se puede consultar en [Actions](https://github.com/JGGallardo/nido-finanzas/actions).
 
 Los datos de cada visitante son locales al origen web: no se publican en GitHub y no se comparten entre dispositivos. La demo crea ejemplos locales y se puede editar. No es una API en producción.
 

@@ -1,4 +1,4 @@
-# Verificación de la entrega local
+# Verificación de la entrega
 
 Fecha: 7 de octubre de 2026. Flutter 3.47.6 stable, Dart 3.13.5, Node.js 22.13.0. Build web de producción con base `/nido-finanzas/` y recursos Flutter incluidos localmente.
 
@@ -21,4 +21,12 @@ Los tests financieros comprueban conservación del consolidado en transferencias
 
 La comprobación offline se realizó después de una primera carga completa y de instalar la caché del sitio. Se detuvo el servidor local, se recargó la app, se creó una cuenta temporal de ARS 8,42 y se eliminó lógicamente para dejar la demo original. No se modificó información financiera real.
 
-No se han ejecutado builds Android, iOS, Windows, macOS o Linux. Las carpetas de plataforma están preparadas; faltan toolchains, firmas y pruebas en dispositivos. La migración PostgreSQL está preparada pero no se ha aplicado a una instancia real. No hay despliegue Railway ni sincronización cloud. El despliegue GitHub Pages y la creación del repositorio remoto requieren la confirmación pendiente en esta entrega.
+## Publicación remota
+
+Repositorio público independiente: [JGGallardo/nido-finanzas](https://github.com/JGGallardo/nido-finanzas).
+
+Aplicación publicada: [Nido Finanzas](https://jggallardo.github.io/nido-finanzas/). Se abrió el enlace público y se comprobó la carga del dashboard, los datos demo y SQLite en el navegador.
+
+La [primera ejecución de GitHub Actions](https://github.com/JGGallardo/nido-finanzas/actions/runs/37628880216) aprobó generación, formato, análisis, tests, compilación web, caché offline y verificación del backend. Los trabajos `verify` y `deploy` terminaron con éxito. El árbol de archivos publicado coincide exactamente con el MVP comprobado localmente. Pages utiliza GitHub Actions como origen y las actualizaciones de `main` publican automáticamente.
+
+No se han ejecutado builds Android, iOS, Windows, macOS o Linux. Las carpetas de plataforma están preparadas; faltan toolchains, firmas y pruebas en dispositivos. La migración PostgreSQL está preparada pero no se ha aplicado a una instancia real. No hay despliegue Railway ni sincronización cloud.
