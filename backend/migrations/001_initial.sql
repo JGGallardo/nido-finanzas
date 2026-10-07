@@ -1,0 +1,50 @@
+-- Draft independent PostgreSQL schema. Apply only to a new Nido database after authentication is implemented.
+BEGIN;
+CREATE TABLE users (
+ id UUID NOT NULL PRIMARY KEY, display_name TEXT NOT NULL, updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE households (
+ id UUID NOT NULL PRIMARY KEY, name TEXT NOT NULL, currency TEXT NOT NULL DEFAULT 'ARS', updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE household_members (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), user_id UUID NOT NULL REFERENCES users(id), role TEXT NOT NULL CHECK(role IN ('owner','editor','viewer')), updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1, UNIQUE(household_id,user_id)
+);
+CREATE TABLE accounts (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), name TEXT NOT NULL, kind TEXT NOT NULL CHECK(kind IN ('cash','bank','wallet','credit','savings','other')), opening_cents BIGINT NOT NULL, currency TEXT NOT NULL DEFAULT 'ARS', updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1, UNIQUE(household_id,id)
+);
+CREATE TABLE categories (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), name TEXT NOT NULL, kind TEXT NOT NULL CHECK(kind IN ('income','expense')), parent_id UUID, updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1, UNIQUE(household_id,id), FOREIGN KEY(household_id,parent_id) REFERENCES categories(household_id,id)
+);
+CREATE TABLE recurring (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), name TEXT NOT NULL, amount_cents BIGINT NOT NULL CHECK(amount_cents > 0), account_id UUID NOT NULL, category_id UUID NOT NULL, frequency TEXT NOT NULL CHECK(frequency IN ('daily','weekly','monthly','yearly')), next_due DATE NOT NULL, updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1, UNIQUE(household_id,id), FOREIGN KEY(household_id,account_id) REFERENCES accounts(household_id,id), FOREIGN KEY(household_id,category_id) REFERENCES categories(household_id,id)
+);
+CREATE TABLE movements (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), kind TEXT NOT NULL CHECK(kind IN ('income','expense','transfer')), amount_cents BIGINT NOT NULL CHECK(amount_cents > 0), occurred_on DATE NOT NULL, account_id UUID NOT NULL, target_account_id UUID, category_id UUID, recurring_id UUID, description TEXT NOT NULL DEFAULT '', updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1,
+ source_type TEXT CHECK(source_type IN ('recurring','installments','debts','goals')), source_id UUID,
+ CHECK((source_type IS NULL AND source_id IS NULL) OR (source_type IS NOT NULL AND source_id IS NOT NULL)),
+ CHECK((kind = 'transfer' AND target_account_id IS NOT NULL AND target_account_id != account_id AND category_id IS NULL) OR (kind IN ('income','expense') AND target_account_id IS NULL AND category_id IS NOT NULL)),
+ FOREIGN KEY(household_id,account_id) REFERENCES accounts(household_id,id), FOREIGN KEY(household_id,target_account_id) REFERENCES accounts(household_id,id), FOREIGN KEY(household_id,category_id) REFERENCES categories(household_id,id), FOREIGN KEY(household_id,recurring_id) REFERENCES recurring(household_id,id)
+);
+CREATE INDEX movements_household_date ON movements(household_id,occurred_on);
+CREATE TABLE budgets (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), category_id UUID NOT NULL, month TEXT NOT NULL, limit_cents BIGINT NOT NULL CHECK(limit_cents > 0), updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1, FOREIGN KEY(household_id,category_id) REFERENCES categories(household_id,id)
+);
+CREATE UNIQUE INDEX budgets_active_unique ON budgets(household_id,category_id,month) WHERE deleted_at IS NULL;
+CREATE TABLE installments (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), name TEXT NOT NULL, account_id UUID NOT NULL, category_id UUID NOT NULL, total_cents BIGINT NOT NULL CHECK(total_cents > 0), count INTEGER NOT NULL CHECK(count BETWEEN 1 AND 120), paid_count INTEGER NOT NULL DEFAULT 0 CHECK(paid_count >= 0 AND paid_count <= count), first_due DATE NOT NULL, updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1, FOREIGN KEY(household_id,account_id) REFERENCES accounts(household_id,id), FOREIGN KEY(household_id,category_id) REFERENCES categories(household_id,id)
+);
+CREATE TABLE debts (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), name TEXT NOT NULL, direction TEXT NOT NULL CHECK(direction IN ('owe','owed')), amount_cents BIGINT NOT NULL CHECK(amount_cents > 0), settled_cents BIGINT NOT NULL DEFAULT 0 CHECK(settled_cents >= 0 AND settled_cents <= amount_cents), due_on DATE NOT NULL, updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE goals (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), name TEXT NOT NULL, account_id UUID NOT NULL, target_cents BIGINT NOT NULL CHECK(target_cents > 0), saved_cents BIGINT NOT NULL DEFAULT 0 CHECK(saved_cents >= 0), due_on DATE NOT NULL, updated_at TIMESTAMPTZ NOT NULL, deleted_at TIMESTAMPTZ, revision INTEGER NOT NULL DEFAULT 1, FOREIGN KEY(household_id,account_id) REFERENCES accounts(household_id,id)
+);
+CREATE TABLE outbox (
+ id UUID NOT NULL PRIMARY KEY, household_id UUID NOT NULL REFERENCES households(id), entity_type TEXT NOT NULL, entity_id UUID NOT NULL, operation TEXT NOT NULL CHECK(operation IN ('upsert','delete')), payload JSONB NOT NULL, created_at TIMESTAMPTZ NOT NULL, attempts INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE sync_state (
+ household_id UUID NOT NULL PRIMARY KEY REFERENCES households(id), cursor TEXT, last_synced_at TIMESTAMPTZ
+);
+
+COMMIT;
+

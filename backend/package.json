@@ -1,0 +1,21 @@
+{
+  "name": "nido-finanzas-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Independent REST foundation for Nido Finanzas; no live financial endpoints yet.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "test": "node --test",
+    "check": "node --check src/app.js && node --check src/server.js && node --check src/database.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0",
+    "pg": "^8.23.1"
+  }
+}
